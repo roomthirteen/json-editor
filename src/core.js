@@ -1,4 +1,7 @@
 var JSONEditor = function(element,options) {
+  if (!(element instanceof Element)) {
+    throw new Error('element should be an instance of Element');
+  }
   options = $extend({},JSONEditor.defaults.options,options||{});
   this.element = element;
   this.options = options;
@@ -328,7 +331,7 @@ JSONEditor.prototype = {
       }
     };
     
-    if(schema.$ref && schema.$ref.substr(0,1) !== "#" && !this.refs[schema.$ref]) {
+    if(schema.$ref && typeof schema.$ref !== "object" && schema.$ref.substr(0,1) !== "#" && !this.refs[schema.$ref]) {
       refs[schema.$ref] = true;
     }
     
@@ -404,6 +407,9 @@ JSONEditor.prototype = {
     while (schema.$ref) {
       var ref = schema.$ref;
       delete schema.$ref;
+      
+      if(!this.refs[ref]) ref = decodeURIComponent(ref);
+      
       schema = this.extendSchemas(schema,this.refs[ref]);
     }
     return schema;
@@ -472,18 +478,18 @@ JSONEditor.prototype = {
       delete extended.allOf;
     }
     // extends schemas should be merged into parent
-    if(schema.extends) {
+    if(schema["extends"]) {
       // If extends is a schema
-      if(!(Array.isArray(schema.extends))) {
-        extended = this.extendSchemas(extended,this.expandSchema(schema.extends));
+      if(!(Array.isArray(schema["extends"]))) {
+        extended = this.extendSchemas(extended,this.expandSchema(schema["extends"]));
       }
       // If extends is an array of schemas
       else {
-        for(i=0; i<schema.extends.length; i++) {
-          extended = this.extendSchemas(extended,this.expandSchema(schema.extends[i]));
+        for(i=0; i<schema["extends"].length; i++) {
+          extended = this.extendSchemas(extended,this.expandSchema(schema["extends"][i]));
         }
       }
-      delete extended.extends;
+      delete extended["extends"];
     }
     // parent should be merged into oneOf schemas
     if(schema.oneOf) {

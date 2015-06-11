@@ -1,6 +1,6 @@
 JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
   getDefault: function() {
-    return $extend({},this.schema.default || {});
+    return $extend({},this.schema["default"] || {});
   },
   getChildEditors: function() {
     return this.editors;
@@ -75,7 +75,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
         var editor = self.editors[key];
         if(editor.property_removed) return;
         var found = false;
-        var width = editor.options.hidden? 0 : editor.getNumColumns();
+        var width = editor.options.hidden? 0 : (editor.options.grid_columns || editor.getNumColumns());
         var height = editor.options.hidden? 0 : editor.container.offsetHeight;
         // See if the editor will fit in any of the existing rows first
         for(var i=0; i<rows.length; i++) {
@@ -146,7 +146,6 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
           
           if(editor.options.hidden) editor.container.style.display = 'none';
           else this.theme.setGridColumnSize(editor.container,rows[i].editors[j].width);
-          editor.container.className += ' container-' + key;
           row.appendChild(editor.container);
         }
       }
@@ -162,7 +161,6 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
         
         if(editor.options.hidden) editor.container.style.display = 'none';
         else self.theme.setGridColumnSize(editor.container,12);
-        editor.container.className += ' container-' + key;
         row.appendChild(editor.container);
       });
     }
@@ -173,6 +171,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     // Schema declared directly in properties
     var schema = this.schema.properties[key] || {};
     schema = $extend({},schema);
+    var matched = this.schema.properties[key]? true : false;
     
     // Any matching patternProperties should be merged in
     if(this.schema.patternProperties) {
@@ -182,8 +181,14 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
         if(regex.test(key)) {
           schema.allOf = schema.allOf || [];
           schema.allOf.push(this.schema.patternProperties[i]);
+          matched = true;
         }
       }
+    }
+    
+    // Hasn't matched other rules, use additionalProperties schema
+    if(!matched && this.schema.additionalProperties && typeof this.schema.additionalProperties === "object") {
+      schema = $extend({},this.schema.additionalProperties);
     }
     
     return schema;
@@ -216,7 +221,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
         });
         self.editors[key].preBuild();
 
-        var width = self.editors[key].options.hidden? 0 : self.editors[key].getNumColumns();
+        var width = self.editors[key].options.hidden? 0 : (self.editors[key].options.grid_columns || self.editors[key].getNumColumns());
 
         self.minwidth += width;
         self.maxwidth += width;
@@ -239,8 +244,8 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
         self.addObjectProperty(key, true);
 
         if(self.editors[key]) {
-          self.minwidth = Math.max(self.minwidth,self.editors[key].getNumColumns());
-          self.maxwidth += self.editors[key].getNumColumns();
+          self.minwidth = Math.max(self.minwidth,(self.editors[key].options.grid_columns || self.editors[key].getNumColumns()));
+          self.maxwidth += (self.editors[key].options.grid_columns || self.editors[key].getNumColumns());
         }
       });
     }
@@ -272,6 +277,9 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
 
         if(self.editors[key].options.hidden) {
           holder.style.display = 'none';
+        }
+        if(self.editors[key].options.input_width) {
+          holder.style.width = self.editors[key].options.input_width;
         }
       });
     }
@@ -507,7 +515,9 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     else this.showEditJSON();
   },
   insertPropertyControlUsingPropertyOrder: function (property, control, container) {
-    var propertyOrder = this.schema.properties[property].propertyOrder;
+    var propertyOrder;
+    if (this.schema.properties[property])
+      propertyOrder = this.schema.properties[property].propertyOrder;
     if (typeof propertyOrder !== "number") propertyOrder = 1000;
     control.propertyOrder = propertyOrder;
 
@@ -530,7 +540,11 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     checkbox = self.theme.getCheckbox();
     checkbox.style.width = 'auto';
 
-    labelText = this.schema.properties[key].title ? this.schema.properties[key].title : key;
+    if (this.schema.properties[key] && this.schema.properties[key].title)
+      labelText = this.schema.properties[key].title;
+    else
+      labelText = key;
+
     label = self.theme.getCheckboxLabel(labelText);
 
     control = self.theme.getFormControl(label,checkbox);

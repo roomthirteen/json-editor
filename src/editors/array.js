@@ -1,6 +1,6 @@
 JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
   getDefault: function() {
-    return this.schema.default || [];
+    return this.schema["default"] || [];
   },
   register: function() {
     this._super();
@@ -168,7 +168,7 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
       
     this.item_info[stringified] = {
       title: schema.title || "item",
-      'default': schema.default,
+      'default': schema["default"],
       width: 12,
       child_editors: schema.properties || schema.items
     };
@@ -294,7 +294,7 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
     // Make sure value has between minItems and maxItems items in it
     if(this.schema.minItems) {
       while(value.length < this.schema.minItems) {
-        value.push(this.getItemInfo(value.length).default);
+        value.push(this.getItemInfo(value.length)["default"]);
       }
     }
     if(this.getMax() && value.length > this.getMax()) {
@@ -338,6 +338,7 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
     self.active_tab = new_active_tab;
 
     self.refreshValue(initial);
+    self.refreshTabs(true);
     self.refreshTabs();
 
     self.onChange();
@@ -360,7 +361,7 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
       
       $each(this.rows,function(i,editor) {
         // Hide the move down button for the last row
-        if(editor.movedown_buttons) {
+        if(editor.movedown_button) {
           if(i === self.rows.length - 1) {
             editor.movedown_button.style.display = 'none';
           }

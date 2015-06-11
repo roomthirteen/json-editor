@@ -258,7 +258,19 @@ JSONEditor.AbstractEditor = Class.extend({
   },
   updateHeaderText: function() {
     if(this.header) {
-      this.header.textContent = this.getHeaderText();
+      // If the header has children, only update the text node's value
+      if(this.header.children.length) {
+        for(var i=0; i<this.header.childNodes.length; i++) {
+          if(this.header.childNodes[i].nodeType===3) {
+            this.header.childNodes[i].nodeValue = this.getHeaderText();
+            break;
+          }
+        }
+      }
+      // Otherwise, just update the entire node
+      else {
+        this.header.textContent = this.getHeaderText();
+      }
     }
   },
   getHeaderText: function(title_only) {
@@ -325,8 +337,8 @@ JSONEditor.AbstractEditor = Class.extend({
     this.parent = null;
   },
   getDefault: function() {
-    if(this.schema.default) return this.schema.default;
-    if(this.schema.enum) return this.schema.enum[0];
+    if(this.schema["default"]) return this.schema["default"];
+    if(this.schema["enum"]) return this.schema["enum"][0];
     
     var type = this.schema.type || this.schema.oneOf;
     if(type && Array.isArray(type)) type = type[0];

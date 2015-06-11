@@ -60,10 +60,10 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
     this.enum_display = [];
 
     // Enum options enumerated
-    if(this.schema.enum) {
+    if(this.schema["enum"]) {
       var display = this.schema.options && this.schema.options.enum_titles || [];
       
-      $each(this.schema.enum,function(i,option) {
+      $each(this.schema["enum"],function(i,option) {
         self.enum_options[i] = ""+option;
         self.enum_display[i] = ""+(display[i] || option);
         self.enum_values[i] = self.typecast(option);
@@ -71,7 +71,7 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
     }
     // Boolean
     else if(this.schema.type === "boolean") {
-      self.enum_display = ['true','false'];
+      self.enum_display = this.schema.options && this.schema.options.enum_titles || ['true','false'];
       self.enum_options = ['1',''];
       self.enum_values = [true,false];
     }
@@ -142,7 +142,7 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
     if(!this.options.compact) this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
     if(this.schema.description) this.description = this.theme.getFormInputDescription(this.schema.description);
 
-    if(this.options.compact) this.container.setAttribute('class',this.container.getAttribute('class')+' compact');
+    if(this.options.compact) this.container.className += ' compact';
 
     this.input = this.theme.getSelectInput(this.enum_options);
     this.theme.setSelectOptions(this.input,this.enum_options,this.enum_display);

@@ -16,7 +16,7 @@ Download the [production version][min] (22K when gzipped) or the [development ve
 Requirements
 -----------------
 
-JSON Schema has no required dependencies.  It only needs a modern browser (tested in Chrome and Firefox).
+JSON Editor has no required dependencies.  It only needs a modern browser (tested in Chrome and Firefox).
 
 ### Optional Requirements
 
@@ -39,7 +39,7 @@ If you learn best by example, check these out:
 *  Advanced Usage Example - http://rawgithub.com/jdorn/json-editor/master/examples/advanced.html
 *  CSS Integration Example - http://rawgithub.com/jdorn/json-editor/master/examples/css_integration.html
 
-The rest of this README contains detailed documentation about every aspect of JSON Editor.
+The rest of this README contains detailed documentation about every aspect of JSON Editor.  For more under-the-hood documentation, check the wiki.
 
 ### Initialize
 
@@ -633,6 +633,17 @@ You can override the default Ace theme by setting the `JSONEditor.plugins.ace.th
 JSONEditor.plugins.ace.theme = 'twilight';
 ```
 
+#### Booleans
+
+The default boolean editor is a select box with options "true" and "false".  To use a checkbox instead, set the format to `checkbox`.
+
+```json
+{
+  "type": "boolean",
+  "format": "checkbox"
+}
+```
+
 #### Arrays
 
 The default array editor takes up a lot of screen real estate.  The `table` and `tabs` formats provide more compact UIs for editing arrays.
@@ -716,7 +727,13 @@ Editors can accept options which alter the behavior in some way.
 *  `disable_collapse` - If set to true, the collapse button will be hidden (works for objects and arrays)
 *  `disable_edit_json` - If set to true, the Edit JSON button will be hidden (works for objects)
 *  `disable_properties` - If set to true, the Edit Properties button will be hidden (works for objects)
+*  `enum_titles` - An array of display values to use for select box options in the same order as defined with the `enum` keyword. Works with schema using enum values.
+*  `expand_height` - If set to true, the input will auto expand/contract to fit the content.  Works best with textareas.
+*  `grid_columns` - Explicitly set the number of grid columns (1-12) for the editor if it's within an object using a grid layout.
 *  `hidden` - If set to true, the editor will not appear in the UI (works for all types)
+*  `input_height` - Explicitly set the height of the input element. Should be a valid CSS width string (e.g. "100px").  Works best with textareas.
+*  `input_width` - Explicitly set the width of the input element. Should be a valid CSS width string (e.g. "100px").  Works for string, number, and integer data types.
+*  `remove_empty_properties` - If set to true for an object, empty object properties (i.e. those with falsy values) will not be returned by getValue().
 
 ```json
 {
@@ -960,7 +977,7 @@ also make it work with an array of objects.  Here's an example:
       "enumSource": [{
         "source": "colors",
         "value": "{{item.text}}"
-      ]}
+      }]
     }
   }
 }

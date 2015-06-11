@@ -188,9 +188,14 @@ JSONEditor.defaults.resolvers.unshift(function(schema) {
   // If the schema is a simple type
   if(typeof schema.type === "string") return schema.type;
 });
-// Use the select editor for all boolean values
+// Boolean editors
 JSONEditor.defaults.resolvers.unshift(function(schema) {
   if(schema.type === 'boolean') {
+    // If explicitly set to 'checkbox', use that
+    if(schema.format === "checkbox" || (schema.options && schema.options.checkbox)) {
+      return "checkbox";
+    }
+    // Otherwise, default to select menu
     return "select";
   }
 });
@@ -225,7 +230,7 @@ JSONEditor.defaults.resolvers.unshift(function(schema) {
 });
 // Use the `enum` or `select` editors for schemas with enumerated properties
 JSONEditor.defaults.resolvers.unshift(function(schema) {
-  if(schema.enum) {
+  if(schema["enum"]) {
     if(schema.type === "array" || schema.type === "object") {
       return "enum";
     }
@@ -236,7 +241,7 @@ JSONEditor.defaults.resolvers.unshift(function(schema) {
 });
 // Use the 'multiselect' editor for arrays of enumerated strings/numbers/integers
 JSONEditor.defaults.resolvers.unshift(function(schema) {
-  if(schema.type === "array" && schema.items && !(Array.isArray(schema.items)) && schema.uniqueItems && schema.items.enum && ['string','number','integer'].indexOf(schema.items.type) >= 0) {
+  if(schema.type === "array" && schema.items && !(Array.isArray(schema.items)) && schema.uniqueItems && schema.items["enum"] && ['string','number','integer'].indexOf(schema.items.type) >= 0) {
     return 'multiselect';
   }
 });
